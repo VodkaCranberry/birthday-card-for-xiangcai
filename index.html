@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>给香菜诡秘的生日贺卡 🎂</title>
+<style>
+  :root {
+    --paper: #fdf7ee;
+    --paper-flap: #f7ebd9;
+    --paper-front: #fbf2e4;
+    --paper-edge: #e8d9bf;
+    --seal: #d4526e;
+    --ink: #4a3f35;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: linear-gradient(135deg, #a8c6ff 0%, #e8b7d4 42%, #ffd9a8 100%);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+
+  /* soft background blobs */
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .45;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before { width: 42vmax; height: 42vmax; background: #8fb8ff; top: -12vmax; left: -10vmax; }
+  body::after  { width: 48vmax; height: 48vmax; background: #ffc9a0; bottom: -16vmax; right: -12vmax; }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    z-index: 1;
+  }
+
+  /* ============ Envelope ============ */
+  .envelope {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(78vw, 560px);
+    aspect-ratio: 1 / 0.667;
+    cursor: pointer;
+    animation: env-in .9s cubic-bezier(.2, .8, .25, 1) both,
+               env-float 4.5s ease-in-out 1s infinite;
+    z-index: 2;
+  }
+
+  @keyframes env-in {
+    from { opacity: 0; transform: translate(-50%, -42%) scale(.86); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  @keyframes env-float {
+    0%, 100% { margin-top: 0; }
+    50%      { margin-top: -10px; }
+  }
+
+  .env-back {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(175deg, #f3e6d0, #eeddc2);
+    border: 1px solid var(--paper-edge);
+    border-radius: 10px;
+    box-shadow: 0 24px 50px -18px rgba(90, 60, 40, .45);
+    z-index: 1;
+  }
+
+  /* front pocket */
+  .env-front {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 55%;
+    background: linear-gradient(180deg, var(--paper-front), #f4e5cd);
+    clip-path: polygon(0 14%, 50% 0, 100% 14%, 100% 100%, 0 100%);
+    z-index: 3;
+    pointer-events: auto;
+  }
+  .env-front::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.06), transparent 30%);
+    pointer-events: none;
+  }
+
+  /* top flap */
+  .flap {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 54%;
+    background: linear-gradient(185deg, var(--paper-flap), #efdcc0);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    transition: transform .75s cubic-bezier(.45, .05, .2, 1), z-index 0s .38s;
+    z-index: 4;
+    backface-visibility: visible;
+    pointer-events: auto;
+  }
+  .flap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.35), transparent 55%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+
+  .seal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(52px, 11vmin, 72px);
+    height: clamp(52px, 11vmin, 72px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ef7f97, var(--seal) 55%, #a83a54);
+    box-shadow: 0 6px 16px -4px rgba(140, 40, 70, .55), inset 0 2px 4px rgba(255,255,255,.4);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: clamp(20px, 4vmin, 28px);
+    font-weight: 700;
+    z-index: 5;
+    transition: opacity .35s, transform .45s cubic-bezier(.3, 1.4, .5, 1);
+    pointer-events: none;
+  }
+
+  /* open states */
+  [data-state="opening"] .flap,
+  [data-state="opened"] .flap,
+  [data-state="floating"] .flap {
+    transform: rotateX(180deg);
+    z-index: 0;
+    transition: transform .75s cubic-bezier(.45, .05, .2, 1), z-index 0s .38s;
+  }
+  [data-state="opening"] .seal,
+  [data-state="opened"] .seal,
+  [data-state="floating"] .seal {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.5);
+  }
+
+  [data-state="floating"] .envelope {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -40%) scale(.94);
+    transition: opacity .6s .15s, transform .6s .15s, visibility 0s .8s;
+    animation: none;
+  }
+
+  /* ============ Card ============ */
+  .card-holder {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    perspective: 1400px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: transform .55s cubic-bezier(.25, 1.2, .4, 1), opacity .45s .25s;
+  }
+
+  /* card reveals only while the flap is opening/open */
+  [data-state="opening"] .card-holder,
+  [data-state="opened"] .card-holder {
+    opacity: 1;
+  }
+  [data-state="opened"] .card-holder {
+    pointer-events: auto;
+    cursor: grab;
+    transform: translate(-50%, calc(-50% - 17%));
+  }
+  .card-holder.dragging { transition: none; cursor: grabbing; }
+
+  .card-holder.docked {
+    position: fixed;
+    inset: 0;
+    left: 0; top: 0; right: 0; bottom: 0;
+    margin: auto;
+    width: min(88vw, 760px);
+    height: max-content;
+    transform: none;
+    z-index: 20;
+    pointer-events: auto;
+    cursor: grab;
+  }
+  .card-holder.docked.dragging { cursor: grabbing; }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1637 / 1017;
+    transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.2, .8, .2, 1);
+  }
+  .card-inner.dragging { transition: none; }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: #fff;
+    padding: 10px;
+    border-radius: 14px;
+    box-shadow: 0 22px 34px -12px rgba(70, 45, 35, .38),
+                inset 0 0 0 1px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .card-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 7px;
+    display: block;
+    pointer-events: none;
+  }
+  .card-face.back { transform: rotateY(180deg); }
+
+  /* ============ UI ============ */
+  .hint {
+    position: fixed;
+    left: 50%;
+    bottom: max(88px, calc(env(safe-area-inset-bottom) + 88px));
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, .78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--ink);
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: clamp(13px, 2.6vmin, 15px);
+    letter-spacing: .04em;
+    box-shadow: 0 8px 24px -8px rgba(80, 50, 40, .35);
+    z-index: 30;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity .4s, transform .4s;
+    animation: hint-bob 2.4s ease-in-out infinite;
+  }
+  @keyframes hint-bob {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-6px); }
+  }
+  .hint[hidden] { display: block; opacity: 0; animation: none; }
+
+  .flip-btn {
+    position: fixed;
+    left: 50%;
+    bottom: max(26px, calc(env(safe-area-inset-bottom) + 26px));
+    transform: translateX(-50%) translateY(20px);
+    border: none;
+    background: rgba(255, 255, 255, .9);
+    color: var(--ink);
+    font: inherit;
+    font-size: clamp(14px, 2.8vmin, 16px);
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: 12px 28px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 10px 26px -8px rgba(80, 50, 40, .45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s .3s, transform .5s .3s, background .2s;
+    z-index: 30;
+  }
+  .flip-btn:hover { background: #fff; }
+  .flip-btn:active { transform: translateX(-50%) translateY(0) scale(.96); }
+  [data-state="floating"] .flip-btn {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .corner-note {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,.92);
+    font-size: clamp(12px, 2.4vmin, 14px);
+    letter-spacing: .18em;
+    text-shadow: 0 2px 8px rgba(80, 50, 60, .35);
+    z-index: 30;
+    pointer-events: none;
+  }
+
+  /* confetti */
+  .confetti {
+    position: fixed;
+    left: 0; top: 0;
+    font-size: clamp(18px, 3.4vmin, 26px);
+    pointer-events: none;
+    z-index: 25;
+    animation: confetti-fall 1.6s cubic-bezier(.2, .6, .4, 1) forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translate(0, 0) rotate(0deg) scale(.6); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1.1); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .envelope { animation: none; }
+    .hint { animation: none; }
+  }
+</style>
+</head>
+<body data-state="closed">
+
+  <div class="corner-note">给 香 菜 诡 秘 · 生 日 快 乐</div>
+
+  <div class="stage" id="stage">
+
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="打开信封">
+      <div class="env-back"></div>
+      <div class="card-holder" id="cardHolder">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face front"><img src="正面.jpg" alt="贺卡正面：手写生日祝福"></div>
+          <div class="card-face back"><img src="反面.jpg" alt="贺卡背面：Happy Birthday 插画"></div>
+        </div>
+      </div>
+      <div class="flap"></div>
+      <div class="env-front"></div>
+      <div class="seal">拆</div>
+    </div>
+
+    <div class="hint" id="hint">✨ 轻点信封，开启惊喜</div>
+    <button class="flip-btn" id="flipBtn" type="button">⟳ 翻转贺卡</button>
+
+  </div>
+
+<script>
+(() => {
+  const body = document.body;
+  const envelope = document.getElementById("envelope");
+  const cardHolder = document.getElementById("cardHolder");
+  const cardInner = document.getElementById("cardInner");
+  const hint = document.getElementById("hint");
+  const flipBtn = document.getElementById("flipBtn");
+
+  let state = "closed";       // closed -> opening -> opened -> floating
+  let rotY = 0, rotX = 0;     // card rotation (deg)
+  let flipCount = 0;          // how many 180° flips applied
+
+  const HINTS = {
+    closed:   "✨ 轻点信封，开启惊喜",
+    opening:  "……",
+    opened:   "☝️ 按住卡片向上拖出（或点一下）",
+    floating: "🖐 拖动旋转 · 点击翻面",
+  };
+
+  function setState(s) {
+    state = s;
+    body.dataset.state = s;
+    hint.textContent = HINTS[s] || "";
+    hint.hidden = (s === "floating");
+  }
+
+  /* ---------- step 1: open envelope ---------- */
+  function openEnvelope() {
+    if (state !== "closed") return;
+    setState("opening");
+    setTimeout(() => { if (state === "opening") setState("opened"); }, 780);
+  }
+  envelope.addEventListener("click", openEnvelope);
+  envelope.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEnvelope(); }
+  });
+
+  /* ---------- step 2: pull the card out ---------- */
+  let mode = null;            // "pull" | "rotate"
+  let lastX = 0, lastY = 0;
+  let startY = 0;
+  let pullPx = 0;
+  let moved = 0;
+
+  const peekY = () => -cardHolder.offsetHeight * 0.17;
+
+  function applyPull(px) {
+    pullPx = px;
+    cardHolder.style.transform =
+      `translate(-50%, calc(-50% + ${peekY()}px + ${px}px))`;
+  }
+
+  function completePull() {
+    // measure where the card is while still inside the envelope
+    const first = cardHolder.getBoundingClientRect();
+
+    // move card out of the envelope so the fading envelope can't hide it
+    document.getElementById("stage").appendChild(cardHolder);
+    cardHolder.classList.add("docked");
+    cardHolder.style.transition = "none";
+    cardHolder.style.transform = "";
+    cardHolder.style.opacity = "1";
+
+    setState("floating");
+    hint.hidden = true;
+
+    // FLIP: animate from old visual position to the docked center position
+    const last = cardHolder.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    const s  = first.width / last.width;
+
+    cardHolder.style.transformOrigin = "top left";
+    cardHolder.style.transform = `translate(${dx}px, ${dy}px) scale(${s})`;
+
+    requestAnimationFrame(() => {
+      cardHolder.style.transition = "transform .75s cubic-bezier(.2, .85, .25, 1)";
+      cardHolder.style.transform = "translate(0px, 0px) scale(1)";
+      setTimeout(() => {
+        cardHolder.style.transition = "";
+        cardHolder.style.transformOrigin = "";
+        cardHolder.style.transform = "";
+      }, 800);
+    });
+
+    burstConfetti();
+  }
+
+  function springBack() {
+    cardHolder.style.transform = "";
+    pullPx = 0;
+  }
+
+  /* ---------- step 3: rotate / flip ---------- */
+  function applyRotation() {
+    cardInner.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  }
+
+  function snapRotation() {
+    const target = Math.round(rotY / 180) * 180;
+    rotY = target;
+    rotX = 0;
+    applyRotation();
+  }
+
+  function flip() {
+    rotY = Math.round(rotY / 180) * 180 + 180;
+    rotX = 0;
+    applyRotation();
+  }
+
+  flipBtn.addEventListener("click", (e) => { e.stopPropagation(); flip(); });
+
+  /* ---------- unified pointer handling ---------- */
+  cardHolder.addEventListener("pointerdown", (e) => {
+    if (state === "opened") {
+      mode = "pull";
+      startY = e.clientY;
+      pullPx = 0;
+      moved = 0;
+      lastX = e.clientX; lastY = e.clientY;
+      cardHolder.classList.add("dragging");
+      cardHolder.style.transition = "none";
+      cardHolder.setPointerCapture(e.pointerId);
+    } else if (state === "floating") {
+      mode = "rotate";
+      lastX = e.clientX; lastY = e.clientY;
+      moved = 0;
+      cardHolder.classList.add("dragging");
+      cardInner.classList.add("dragging");
+      cardHolder.setPointerCapture(e.pointerId);
+    }
+  });
+
+  cardHolder.addEventListener("pointermove", (e) => {
+    if (!mode) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    moved += Math.abs(dx) + Math.abs(dy);
+
+    if (mode === "pull") {
+      const delta = e.clientY - startY; // positive = down
+      applyPull(Math.min(0, delta));    // only allow upward
+    } else if (mode === "rotate") {
+      rotY += dx * 0.55;
+      rotX = Math.max(-28, Math.min(28, rotX - dy * 0.25));
+      applyRotation();
+      lastX = e.clientX; lastY = e.clientY;
+    }
+  });
+
+  function endPointer(e) {
+    if (!mode) return;
+    const m = mode;
+    mode = null;
+
+    if (m === "pull") {
+      cardHolder.classList.remove("dragging");
+      cardHolder.style.transition = "";
+      const cardH = cardHolder.offsetHeight;
+      if (moved < 10) {
+        // treated as click -> auto pull
+        completePull();
+      } else if (-pullPx > cardH * 0.38) {
+        completePull();
+      } else {
+        springBack();
+      }
+    } else if (m === "rotate") {
+      cardHolder.classList.remove("dragging");
+      cardInner.classList.remove("dragging");
+      if (moved < 8) {
+        flip();                 // click without drag -> flip
+      } else {
+        snapRotation();         // release -> settle to nearest face
+      }
+    }
+  }
+  cardHolder.addEventListener("pointerup", endPointer);
+  cardHolder.addEventListener("pointercancel", endPointer);
+
+  /* ---------- confetti ---------- */
+  function burstConfetti() {
+    const emojis = ["🎂", "✨", "🎀", "🥳", "💛", "🌸", "🎉"];
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    for (let i = 0; i < 26; i++) {
+      const el = document.createElement("span");
+      el.className = "confetti";
+      el.textContent = emojis[i % emojis.length];
+      const angle = (Math.PI * 2 * i) / 26 + Math.random() * 0.5;
+      const dist = 120 + Math.random() * 220;
+      el.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+      el.style.setProperty("--dy", `${Math.sin(angle) * dist * 0.7 + 140}px`);
+      el.style.setProperty("--rot", `${(Math.random() * 540 - 270) | 0}deg`);
+      el.style.left = cx + (Math.random() * 80 - 40) + "px";
+      el.style.top = cy + (Math.random() * 40 - 20) + "px";
+      el.style.animationDelay = Math.random() * 0.15 + "s";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  }
+
+  /* ---------- init ---------- */
+  applyRotation();
+})();
+</script>
+</body>
+</html>
