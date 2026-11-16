@@ -403,7 +403,6 @@
   let state = "closed";       // closed -> opening -> opened -> floating
   let rotY = 0, rotX = 0;     // card rotation (deg)
   let flipCount = 0;          // how many 180° flips applied
-  let rotatedOnce = false;
 
   const HINTS = {
     closed:   "✨ 轻点信封，开启惊喜",
@@ -491,26 +490,17 @@
     cardInner.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   }
 
-  function hideRotateHint() {
-    if (state === "floating" && !rotatedOnce) {
-      rotatedOnce = true;
-      hint.hidden = true;
-    }
-  }
-
   function snapRotation() {
     const target = Math.round(rotY / 180) * 180;
     rotY = target;
     rotX = 0;
     applyRotation();
-    hideRotateHint();
   }
 
   function flip() {
     rotY = Math.round(rotY / 180) * 180 + 180;
     rotX = 0;
     applyRotation();
-    hideRotateHint();
   }
 
   /* ---------- download card images ---------- */
@@ -565,7 +555,6 @@
       rotY += dx * 0.55;
       rotX = Math.max(-28, Math.min(28, rotX - dy * 0.25));
       applyRotation();
-      if (moved > 30) hideRotateHint();
       lastX = e.clientX; lastY = e.clientY;
     }
   });
