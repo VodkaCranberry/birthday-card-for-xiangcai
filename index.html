@@ -296,25 +296,22 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  .flip-btn,
   .download-btn {
     border: none;
     background: rgba(255, 255, 255, .9);
     color: var(--ink);
     font: inherit;
-    font-size: clamp(12px, 2.4vmin, 15px);
+    font-size: clamp(13px, 2.6vmin, 15px);
     font-weight: 600;
     letter-spacing: .04em;
-    padding: 11px 16px;
+    padding: 11px 22px;
     border-radius: 999px;
     cursor: pointer;
     box-shadow: 0 10px 26px -8px rgba(80, 50, 40, .45);
     transition: background .2s, transform .15s;
     white-space: nowrap;
   }
-  .flip-btn:hover,
   .download-btn:hover { background: #fff; }
-  .flip-btn:active,
   .download-btn:active { transform: scale(.96); }
 
   .corner-note {
@@ -385,7 +382,6 @@
 
     <div class="hint" id="hint">✨ 轻点信封，开启惊喜</div>
     <div class="actions">
-      <button class="flip-btn" id="flipBtn" type="button">⟳ 翻转贺卡</button>
       <button class="download-btn" id="downloadFront" type="button">⬇️ 下载正面</button>
       <button class="download-btn" id="downloadBack" type="button">⬇️ 下载反面</button>
     </div>
@@ -401,7 +397,6 @@
   const cardHolder = document.getElementById("cardHolder");
   const cardInner = document.getElementById("cardInner");
   const hint = document.getElementById("hint");
-  const flipBtn = document.getElementById("flipBtn");
   const downloadFront = document.getElementById("downloadFront");
   const downloadBack = document.getElementById("downloadBack");
 
@@ -517,8 +512,6 @@
     applyRotation();
     hideRotateHint();
   }
-
-  flipBtn.addEventListener("click", (e) => { e.stopPropagation(); flip(); });
 
   /* ---------- download card images ---------- */
   function downloadImage(href, name) {
