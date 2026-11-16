@@ -78,49 +78,89 @@
     inset: 0;
     background: linear-gradient(175deg, #f3e6d0, #eeddc2);
     border: 1px solid var(--paper-edge);
-    border-radius: 10px;
+    border-radius: 14px;
     box-shadow: 0 24px 50px -18px rgba(90, 60, 40, .45);
     z-index: 1;
   }
 
-  /* front pocket */
+  /* front pocket — peak sits at 45% (100% − 55%); flap tip meets it */
   .env-front {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     height: 55%;
     background: linear-gradient(180deg, var(--paper-front), #f4e5cd);
-    clip-path: polygon(0 14%, 50% 0, 100% 14%, 100% 100%, 0 100%);
+    /* shallower side dips so the V reads cleanly against the flap edges */
+    clip-path: polygon(0 18%, 50% 0, 100% 18%, 100% 100%, 0 100%);
     z-index: 3;
     pointer-events: auto;
+  }
+  /* soft shelf under the flap tip so the junction has no hard seam */
+  .env-front::before {
+    content: "";
+    position: absolute;
+    left: 8%; right: 8%; top: 0;
+    height: 28%;
+    background: radial-gradient(ellipse 70% 100% at 50% 0%, rgba(90, 60, 40, .14), transparent 70%);
+    pointer-events: none;
+    z-index: 1;
   }
   .env-front::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,.06), transparent 30%);
+    background: linear-gradient(180deg, rgba(0,0,0,.05), transparent 32%);
     pointer-events: none;
   }
 
-  /* top flap */
+  /*
+   * Top flap — height 47% so the tip lands just past the pocket peak (45%),
+   * rounded top corners match .env-back radius, soft edge shadows remove
+   * the “cut paper” look where it meets the body.
+   */
   .flap {
+    --flap-r: 14px;
     position: absolute;
     left: 0; right: 0; top: 0;
-    height: 54%;
+    height: 47%;
     background: linear-gradient(185deg, var(--paper-flap), #efdcc0);
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    /* rounded top corners + triangle tip (clockwise from top-left) */
+    clip-path: polygon(
+      var(--flap-r) 0,
+      calc(100% - var(--flap-r)) 0,
+      100% var(--flap-r),
+      50% 100%,
+      0 var(--flap-r)
+    );
     transform-origin: top center;
     transform: rotateX(0deg);
     transition: transform .75s cubic-bezier(.45, .05, .2, 1), z-index 0s .38s;
     z-index: 4;
     backface-visibility: visible;
     pointer-events: auto;
+    /* soft drop under the whole flap — lifts edges off the body */
+    filter: drop-shadow(0 3px 4px rgba(80, 55, 40, .20))
+            drop-shadow(0 1px 1px rgba(80, 55, 40, .12));
   }
+  /* paper sheen on the flap face */
   .flap::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,.35), transparent 55%);
-    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,.38), transparent 58%);
+    clip-path: inherit;
+    pointer-events: none;
+  }
+  /* faint crease lines along both folded edges */
+  .flap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom right, transparent calc(50% - 1px), rgba(90,60,40,.10) 50%, transparent calc(50% + 1px)),
+      linear-gradient(to bottom left,  transparent calc(50% - 1px), rgba(90,60,40,.10) 50%, transparent calc(50% + 1px));
+    clip-path: inherit;
+    pointer-events: none;
+    opacity: .85;
   }
 
   .seal {
