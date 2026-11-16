@@ -302,14 +302,15 @@
     background: rgba(255, 255, 255, .9);
     color: var(--ink);
     font: inherit;
-    font-size: clamp(13px, 2.6vmin, 15px);
+    font-size: clamp(12px, 2.4vmin, 15px);
     font-weight: 600;
-    letter-spacing: .06em;
-    padding: 11px 22px;
+    letter-spacing: .04em;
+    padding: 11px 16px;
     border-radius: 999px;
     cursor: pointer;
     box-shadow: 0 10px 26px -8px rgba(80, 50, 40, .45);
     transition: background .2s, transform .15s;
+    white-space: nowrap;
   }
   .flip-btn:hover,
   .download-btn:hover { background: #fff; }
@@ -385,7 +386,8 @@
     <div class="hint" id="hint">✨ 轻点信封，开启惊喜</div>
     <div class="actions">
       <button class="flip-btn" id="flipBtn" type="button">⟳ 翻转贺卡</button>
-      <button class="download-btn" id="downloadBtn" type="button">⬇️ 下载贺卡</button>
+      <button class="download-btn" id="downloadFront" type="button">⬇️ 下载正面</button>
+      <button class="download-btn" id="downloadBack" type="button">⬇️ 下载反面</button>
     </div>
 
   </div>
@@ -400,7 +402,8 @@
   const cardInner = document.getElementById("cardInner");
   const hint = document.getElementById("hint");
   const flipBtn = document.getElementById("flipBtn");
-  const downloadBtn = document.getElementById("downloadBtn");
+  const downloadFront = document.getElementById("downloadFront");
+  const downloadBack = document.getElementById("downloadBack");
 
   let state = "closed";       // closed -> opening -> opened -> floating
   let rotY = 0, rotX = 0;     // card rotation (deg)
@@ -518,22 +521,21 @@
   flipBtn.addEventListener("click", (e) => { e.stopPropagation(); flip(); });
 
   /* ---------- download card images ---------- */
-  downloadBtn.addEventListener("click", (e) => {
+  function downloadImage(href, name) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  downloadFront.addEventListener("click", (e) => {
     e.stopPropagation();
-    const files = [
-      { href: "正面.jpg", name: "贺卡-正面.jpg" },
-      { href: "反面.jpg", name: "贺卡-反面.jpg" },
-    ];
-    files.forEach((f, i) => {
-      setTimeout(() => {
-        const a = document.createElement("a");
-        a.href = f.href;
-        a.download = f.name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }, i * 400);
-    });
+    downloadImage("正面.jpg", "贺卡-正面.jpg");
+  });
+  downloadBack.addEventListener("click", (e) => {
+    e.stopPropagation();
+    downloadImage("反面.jpg", "贺卡-反面.jpg");
   });
 
   /* ---------- unified pointer handling ---------- */
