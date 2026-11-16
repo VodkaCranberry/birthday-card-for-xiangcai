@@ -265,6 +265,17 @@
   }
   .hint[hidden] { display: block; opacity: 0; animation: none; }
 
+  /* after pull-out: move hint to the top so it never collides with bottom buttons */
+  [data-state="floating"] .hint {
+    top: max(52px, calc(env(safe-area-inset-top) + 52px));
+    bottom: auto;
+    animation: hint-bob-top 2.4s ease-in-out infinite;
+  }
+  @keyframes hint-bob-top {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-6px); }
+  }
+
   .actions {
     position: fixed;
     left: 50%;
