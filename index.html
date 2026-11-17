@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>给香菜诡秘的生日贺卡 🎂</title>
+<title>给香菜诡秘的生日密件 🕵️</title>
 <style>
   :root {
     --paper: #fdf7ee;
@@ -12,6 +12,10 @@
     --paper-edge: #e8d9bf;
     --seal: #d4526e;
     --ink: #4a3f35;
+    --case: #1c2333;
+    --case-2: #2a3348;
+    --gold: #e8c56a;
+    --clue: #7dd3a0;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,7 +34,6 @@
     touch-action: none;
   }
 
-  /* soft background blobs */
   body::before, body::after {
     content: "";
     position: fixed;
@@ -50,7 +53,393 @@
     z-index: 1;
   }
 
-  /* ============ Envelope ============ */
+  /* stage visibility: story → investigate → card */
+  body:not([data-stage="card"]) .stage { display: none; }
+  body[data-stage="card"] .story-screen,
+  body[data-stage="card"] .invest-screen { display: none !important; }
+  body:not([data-stage="investigate"]) .invest-screen { display: none !important; }
+  body[data-stage="investigate"] .story-screen { display: none !important; }
+  body:not([data-stage="card"]) .hint,
+  body:not([data-stage="card"]) .actions { display: none !important; }
+  body:not([data-stage="story"]) .corner-note { display: none; }
+
+  /* ============ STORY ============ */
+  .story-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(232, 197, 106, .12), transparent 55%),
+      linear-gradient(165deg, #141a28 0%, var(--case) 45%, #12161f 100%);
+    overflow: auto;
+    touch-action: pan-y;
+  }
+  .case-file {
+    width: min(440px, 100%);
+    background: linear-gradient(180deg, #f7f1e4, #efe6d2);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: clamp(22px, 5vw, 34px);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.08);
+    position: relative;
+    transform: rotate(-.4deg);
+  }
+  .case-file::before {
+    content: "";
+    position: absolute;
+    top: 14px; right: 18px;
+    width: 64px; height: 64px;
+    border: 3px solid rgba(196, 60, 80, .55);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+  }
+  .case-stamp {
+    position: absolute;
+    top: 26px; right: 22px;
+    width: 56px; height: 56px;
+    border: 2.5px solid rgba(196, 60, 80, .6);
+    border-radius: 50%;
+    color: rgba(196, 60, 80, .7);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    display: grid;
+    place-items: center;
+    transform: rotate(12deg);
+    text-align: center;
+    line-height: 1.15;
+    pointer-events: none;
+  }
+  .case-meta {
+    font-size: 11px;
+    letter-spacing: .22em;
+    color: #8a7a5c;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .case-file h1 {
+    font-size: clamp(22px, 6vw, 28px);
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+    color: #2c2418;
+  }
+  .case-sub {
+    font-size: 13px;
+    color: #7a6a4e;
+    margin-bottom: 18px;
+    letter-spacing: .12em;
+  }
+  .case-body {
+    font-size: clamp(14px, 3.6vw, 15.5px);
+    line-height: 1.85;
+    color: #4a3f35;
+    border-top: 1px dashed #c9b892;
+    padding-top: 14px;
+    margin-bottom: 22px;
+  }
+  .case-body p + p { margin-top: .75em; }
+  .case-body .hl { color: #b03050; font-weight: 700; }
+  .start-btn {
+    width: 100%;
+    border: none;
+    background: linear-gradient(180deg, #2f3a52, #1e2638);
+    color: #f0e6d0;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    padding: 15px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,.5);
+    transition: transform .15s, filter .2s;
+  }
+  .start-btn:hover { filter: brightness(1.1); }
+  .start-btn:active { transform: scale(.97); }
+  .case-foot {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: #9a8b6a;
+    letter-spacing: .14em;
+  }
+
+  /* ============ INVESTIGATE ============ */
+  .invest-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, #2a3148 0%, #3a3348 55%, #4a3a40 100%);
+    touch-action: none;
+  }
+  .invest-screen[hidden] { display: none !important; }
+  .invest-hud {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    color: #f0e8d8;
+    z-index: 5;
+    flex: 0 0 auto;
+  }
+  .invest-title {
+    font-size: clamp(13px, 3.2vw, 15px);
+    letter-spacing: .12em;
+    font-weight: 700;
+  }
+  .invest-title small {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    letter-spacing: .16em;
+    color: rgba(240,232,216,.55);
+    margin-top: 2px;
+  }
+  .clue-pill {
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(232,197,106,.45);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    letter-spacing: .08em;
+    white-space: nowrap;
+  }
+
+  .room {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 12px 12px;
+    border-radius: 14px;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, #3d4660 0%, #3d4660 62%, #5a463c 62%, #4a3830 100%);
+    box-shadow: inset 0 0 60px rgba(0,0,0,.35), 0 12px 30px -12px rgba(0,0,0,.5);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  /* wall trim */
+  .room::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 62%;
+    height: 4px;
+    background: linear-gradient(90deg, #6a5648, #7d6854, #6a5648);
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* vignette */
+  .room::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 45%, transparent 40%, rgba(0,0,0,.38) 100%);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* furniture (decor only) */
+  .furn { position: absolute; z-index: 2; pointer-events: none; }
+  .furn-desk {
+    left: 8%; right: 8%; bottom: 8%;
+    height: 18%;
+    background: linear-gradient(180deg, #8b6914, #6e5210);
+    border-radius: 4px 4px 2px 2px;
+    box-shadow: 0 8px 16px -6px rgba(0,0,0,.45);
+  }
+  .furn-desk::before {
+    content: "";
+    position: absolute;
+    left: 6%; right: 6%; top: -10px;
+    height: 12px;
+    background: linear-gradient(180deg, #a07a1c, #8b6914);
+    border-radius: 3px;
+  }
+  .furn-shelf {
+    right: 6%; top: 10%;
+    width: 22%; height: 38%;
+    background: linear-gradient(90deg, #5c4030, #6e5040);
+    border-radius: 3px;
+    box-shadow: inset -4px 0 8px rgba(0,0,0,.25);
+    border: 2px solid #4a3428;
+  }
+  .furn-shelf::before, .furn-shelf::after {
+    content: "";
+    position: absolute;
+    left: 8%; right: 8%;
+    height: 3px;
+    background: #4a3428;
+  }
+  .furn-shelf::before { top: 32%; }
+  .furn-shelf::after  { top: 64%; }
+  .furn-window {
+    left: 8%; top: 10%;
+    width: 28%; height: 30%;
+    background: linear-gradient(180deg, #8eb4e0, #c8dff2 60%, #9bb8d4);
+    border: 4px solid #5a4a3c;
+    border-radius: 2px;
+    box-shadow: inset 0 0 20px rgba(255,255,255,.35);
+  }
+  .furn-window::before {
+    content: "";
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 4px;
+    background: #5a4a3c;
+    transform: translateX(-50%);
+  }
+  .furn-window::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 4px;
+    background: #5a4a3c;
+    transform: translateY(-50%);
+  }
+  .furn-plant {
+    left: 6%; bottom: 28%;
+    width: 12%; height: 22%;
+  }
+  .furn-plant::before {
+    content: "🪴";
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(28px, 7vmin, 44px);
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,.35));
+  }
+
+  /* hotspots */
+  .spot {
+    position: absolute;
+    z-index: 4;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    width: clamp(56px, 16vmin, 84px);
+    height: clamp(56px, 16vmin, 84px);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: clamp(26px, 7vmin, 40px);
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
+    transition: transform .15s;
+    touch-action: manipulation;
+  }
+  .spot::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(232, 197, 106, .75);
+    animation: pulse 2s ease-out infinite;
+    pointer-events: none;
+  }
+  .spot:hover { transform: scale(1.08); }
+  .spot:active { transform: scale(.94); }
+  .spot.found {
+    opacity: .45;
+    filter: grayscale(.4) drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  }
+  .spot.found::before { animation: none; opacity: 0; }
+  .spot .tag {
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    letter-spacing: .06em;
+    color: rgba(255,255,255,.85);
+    background: rgba(0,0,0,.45);
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-family: inherit;
+    pointer-events: none;
+  }
+  @keyframes pulse {
+    0%   { transform: scale(.85); opacity: .9; }
+    70%  { transform: scale(1.2); opacity: 0; }
+    100% { transform: scale(1.2); opacity: 0; }
+  }
+
+  .spot-calendar  { left: 12%; top: 14%; }
+  .spot-frame     { left: 42%; top: 12%; }
+  .spot-notebook  { left: 30%; bottom: 22%; }
+  .spot-lamp      { right: 30%; bottom: 24%; }
+  .spot-books     { right: 8%; top: 16%; }
+
+  /* envelope hotspot — hidden until enough clues */
+  .spot-envelope {
+    left: 50%; top: 48%;
+    transform: translate(-50%, -50%);
+    width: clamp(72px, 20vmin, 100px);
+    height: clamp(72px, 20vmin, 100px);
+    font-size: clamp(36px, 10vmin, 54px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s, transform .5s;
+  }
+  .spot-envelope::before { border-color: rgba(212, 82, 110, .85); }
+  .spot-envelope.ready {
+    opacity: 1;
+    pointer-events: auto;
+    animation: env-glow 1.6s ease-in-out infinite;
+  }
+  .spot-envelope.ready:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .spot-envelope.ready:active { transform: translate(-50%, -50%) scale(.94); }
+  @keyframes env-glow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(212,82,110,.55)); }
+    50%      { filter: drop-shadow(0 0 22px rgba(212,82,110,.95)); }
+  }
+
+  .spot-envelope .tag { bottom: -6px; color: #ffd6e0; }
+
+  /* toast */
+  .clue-toast {
+    position: absolute;
+    left: 50%; bottom: 18px;
+    transform: translateX(-50%) translateY(20px);
+    width: min(92%, 400px);
+    background: rgba(18, 22, 34, .92);
+    color: #f0e8d8;
+    border: 1px solid rgba(232,197,106,.35);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: clamp(13px, 3.4vw, 14.5px);
+    line-height: 1.65;
+    z-index: 6;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s, transform .3s;
+    box-shadow: 0 12px 30px -10px rgba(0,0,0,.55);
+  }
+  .clue-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .clue-toast strong {
+    display: block;
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: .16em;
+    margin-bottom: 6px;
+  }
+  .clue-toast .ok { color: var(--clue); font-weight: 700; }
+  .clue-toast .warn { color: #f0a0b0; font-weight: 700; }
+
+  /* ============ Envelope / Card (existing flow) ============ */
   .envelope {
     position: absolute;
     left: 50%;
@@ -83,7 +472,6 @@
     z-index: 1;
   }
 
-  /* front pocket */
   .env-front {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -101,7 +489,6 @@
     pointer-events: none;
   }
 
-  /* top flap */
   .flap {
     position: absolute;
     left: 0; right: 0; top: 0;
@@ -143,7 +530,6 @@
     pointer-events: none;
   }
 
-  /* open states */
   [data-state="opening"] .flap,
   [data-state="opened"] .flap,
   [data-state="floating"] .flap {
@@ -167,7 +553,6 @@
     animation: none;
   }
 
-  /* ============ Card ============ */
   .card-holder {
     position: absolute;
     left: 50%;
@@ -181,7 +566,6 @@
     transition: transform .55s cubic-bezier(.25, 1.2, .4, 1), opacity .45s .25s;
   }
 
-  /* card reveals only while the flap is opening/open */
   [data-state="opening"] .card-holder,
   [data-state="opened"] .card-holder {
     opacity: 1;
@@ -265,7 +649,6 @@
   }
   .hint[hidden] { display: block; opacity: 0; animation: none; }
 
-  /* after pull-out: move hint to the top so it never collides with bottom buttons */
   [data-state="floating"] .hint {
     top: max(52px, calc(env(safe-area-inset-top) + 52px));
     bottom: auto;
@@ -336,18 +719,19 @@
     font-size: clamp(10px, 2vmin, 12px);
     letter-spacing: .1em;
     text-shadow: 0 1px 6px rgba(80, 50, 60, .3);
-    z-index: 30;
+    z-index: 50;
     pointer-events: none;
     white-space: nowrap;
   }
+  body[data-stage="story"] .credit,
+  body[data-stage="investigate"] .credit { color: rgba(255,255,255,.4); }
 
-  /* confetti */
   .confetti {
     position: fixed;
     left: 0; top: 0;
     font-size: clamp(18px, 3.4vmin, 26px);
     pointer-events: none;
-    z-index: 25;
+    z-index: 45;
     animation: confetti-fall 1.6s cubic-bezier(.2, .6, .4, 1) forwards;
   }
   @keyframes confetti-fall {
@@ -358,21 +742,86 @@
   @media (prefers-reduced-motion: reduce) {
     .envelope { animation: none; }
     .hint { animation: none; }
+    .spot::before { animation: none; }
+    .spot-envelope.ready { animation: none; }
+  }
+
+  @media (max-height: 500px) and (orientation: landscape) {
+    .room { margin: 0 8px 8px; }
+    .invest-hud { padding-top: 8px; padding-bottom: 6px; }
   }
 </style>
 </head>
-<body data-state="closed">
+<body data-stage="story" data-state="closed">
 
+  <!-- ========== STAGE 1: STORY ========== -->
+  <div class="story-screen" id="storyScreen">
+    <div class="case-file">
+      <div class="case-stamp">机密<br>CONFIDENTIAL</div>
+      <div class="case-meta">Case File · No. 1115</div>
+      <h1>失踪的生日密件</h1>
+      <div class="case-sub">代号「香菜」 · 特别搜查令</div>
+      <div class="case-body">
+        <p>致 调查员 <span class="hl">香菜诡秘</span>：</p>
+        <p>明天就是你的生日。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。</p>
+        <p>现场只留下一句暗语：<span class="hl">「先找到三条线索，密信自会现身。」</span></p>
+        <p>仔细搜查每一件物品。祝你好运，侦探。</p>
+      </div>
+      <button class="start-btn" id="startBtn" type="button">🔍 进入现场 · 开始调查</button>
+      <div class="case-foot">EVIDENCE FIRST · SURPRISE LATER</div>
+    </div>
+  </div>
+
+  <!-- ========== STAGE 2: INVESTIGATE ========== -->
+  <div class="invest-screen" id="investScreen" hidden>
+    <div class="invest-hud">
+      <div class="invest-title">
+        现场搜查中
+        <small>点击可疑物品收集线索</small>
+      </div>
+      <div class="clue-pill">线索 <span id="clueCount">0</span> / 3</div>
+    </div>
+
+    <div class="room" id="room">
+      <div class="furn furn-window"></div>
+      <div class="furn furn-shelf"></div>
+      <div class="furn furn-desk"></div>
+      <div class="furn furn-plant"></div>
+
+      <button class="spot spot-calendar" data-clue="calendar" type="button" aria-label="日历">
+        📅<span class="tag">日历</span>
+      </button>
+      <button class="spot spot-frame" data-clue="frame" type="button" aria-label="相框">
+        🖼️<span class="tag">相框</span>
+      </button>
+      <button class="spot spot-notebook" data-clue="notebook" type="button" aria-label="笔记本">
+        📓<span class="tag">笔记本</span>
+      </button>
+      <button class="spot spot-lamp" data-clue="lamp" type="button" aria-label="台灯">
+        💡<span class="tag">台灯</span>
+      </button>
+      <button class="spot spot-books" data-clue="books" type="button" aria-label="书架">
+        📚<span class="tag">书架</span>
+      </button>
+
+      <button class="spot spot-envelope" id="envelopeSpot" data-clue="envelope" type="button" aria-label="神秘信封" disabled>
+        💌<span class="tag">密信？</span>
+      </button>
+
+      <div class="clue-toast" id="clueToast" role="status"></div>
+    </div>
+  </div>
+
+  <!-- ========== STAGE 3: CARD ========== -->
   <div class="corner-note">给 香 菜 诡 秘 · 生 日 快 乐</div>
 
   <div class="stage" id="stage">
-
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="打开信封">
       <div class="env-back"></div>
       <div class="card-holder" id="cardHolder">
         <div class="card-inner" id="cardInner">
-          <div class="card-face front"><img src="正面.jpg" alt="贺卡正面：手写生日祝福"></div>
-          <div class="card-face back"><img src="反面.jpg" alt="贺卡背面：Happy Birthday 插画"></div>
+          <div class="card-face front"><img src="正面.jpg" alt="贺卡正面：Happy Birthday 插画"></div>
+          <div class="card-face back"><img src="反面.jpg" alt="贺卡背面：手写生日祝福"></div>
         </div>
       </div>
       <div class="flap"></div>
@@ -385,7 +834,6 @@
       <button class="download-btn" id="downloadFront" type="button">⬇️ 下载正面</button>
       <button class="download-btn" id="downloadBack" type="button">⬇️ 下载反面</button>
     </div>
-
   </div>
 
   <div class="credit">designed by 黄师傅</div>
@@ -393,6 +841,109 @@
 <script>
 (() => {
   const body = document.body;
+  const storyScreen = document.getElementById("storyScreen");
+  const investScreen = document.getElementById("investScreen");
+  const startBtn = document.getElementById("startBtn");
+  const clueCountEl = document.getElementById("clueCount");
+  const clueToast = document.getElementById("clueToast");
+  const envelopeSpot = document.getElementById("envelopeSpot");
+
+  const NEED = 3;
+  const found = new Set();
+  let toastTimer = null;
+
+  const CLUES = {
+    calendar: {
+      title: "线索 · 日历",
+      text: "11 月的某一天被红笔重重圈住，旁边写着一个字：<b>「明」</b>。生日，就在明天。",
+    },
+    frame: {
+      title: "线索 · 相框",
+      text: "玻璃相框里是两张笑得毫无形象的脸。背面一行小字：<b>「最好的闺蜜，香菜诡秘。」</b>",
+    },
+    notebook: {
+      title: "线索 · 笔记本",
+      text: "翻开的一页写着：<b>「礼物藏在房间最中央——别被日常晃了眼。」</b> 黄师傅的字迹。",
+    },
+    lamp: {
+      title: "线索 · 台灯",
+      text: "灯罩下压着一张便签：<b>「找到粉红封印了吗？集齐三条线索，它就会出现。」</b>",
+    },
+    books: {
+      title: "线索 · 书架",
+      text: "抽出一本《谜题集》，扉页龙飞凤舞：<b>「黄师傅到此一游 —— 生日快乐！」</b>",
+    },
+    envelope: {
+      title: "★ 密信现身",
+      text: "桌面上凭空浮出一封粉红火漆封印的信……<b>就是它！</b>",
+    },
+  };
+
+  /* ---------- stage transitions ---------- */
+  function setStage(name) {
+    body.dataset.stage = name;
+    if (name === "card") {
+      // sync hint with card state machine (still "closed")
+      hint.textContent = HINTS.closed;
+      hint.hidden = false;
+    }
+  }
+
+  startBtn.addEventListener("click", () => {
+    investScreen.hidden = false;
+    setStage("investigate");
+  });
+
+  function showToast(html) {
+    clueToast.innerHTML = html;
+    clueToast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => clueToast.classList.remove("show"), 3600);
+  }
+
+  function refreshEnvelope() {
+    if (found.size >= NEED) {
+      envelopeSpot.classList.add("ready");
+      envelopeSpot.disabled = false;
+    }
+  }
+
+  investScreen.addEventListener("click", (e) => {
+    const spot = e.target.closest(".spot");
+    if (!spot || spot.classList.contains("found")) return;
+    const key = spot.dataset.clue;
+
+    if (key === "envelope") {
+      if (found.size < NEED) {
+        showToast(`<strong>还打不开</strong><span class="warn">线索不足——先集齐 ${NEED} 条线索。</span>`);
+        return;
+      }
+      spot.classList.add("found");
+      const c = CLUES.envelope;
+      showToast(`<strong>${c.title}</strong>${c.text}`);
+      burstConfetti();
+      setTimeout(() => {
+        setStage("card");
+        // brief pause so envelope entrance animation plays cleanly
+      }, 900);
+      return;
+    }
+
+    const c = CLUES[key];
+    if (!c) return;
+    spot.classList.add("found");
+    found.add(key);
+    clueCountEl.textContent = String(Math.min(found.size, NEED));
+
+    const done = found.size === NEED;
+    showToast(
+      `<strong>${c.title}</strong>${c.text}` +
+      (done ? `<div style="margin-top:8px"><span class="ok">✓ 线索已齐——密信即将出现！</span></div>` : "")
+    );
+    refreshEnvelope();
+  });
+
+  /* ================= card flow (unchanged) ================= */
   const envelope = document.getElementById("envelope");
   const cardHolder = document.getElementById("cardHolder");
   const cardInner = document.getElementById("cardInner");
@@ -400,9 +951,8 @@
   const downloadFront = document.getElementById("downloadFront");
   const downloadBack = document.getElementById("downloadBack");
 
-  let state = "closed";       // closed -> opening -> opened -> floating
-  let rotY = 0, rotX = 0;     // card rotation (deg)
-  let flipCount = 0;          // how many 180° flips applied
+  let state = "closed";
+  let rotY = 0, rotX = 0;
 
   const HINTS = {
     closed:   "✨ 轻点信封，开启惊喜",
@@ -415,12 +965,11 @@
     state = s;
     body.dataset.state = s;
     hint.textContent = HINTS[s] || "";
-    // keep the rotate hint visible after the card is out
     hint.hidden = false;
   }
 
-  /* ---------- step 1: open envelope ---------- */
   function openEnvelope() {
+    if (body.dataset.stage !== "card") return;
     if (state !== "closed") return;
     setState("opening");
     setTimeout(() => { if (state === "opening") setState("opened"); }, 780);
@@ -430,8 +979,7 @@
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEnvelope(); }
   });
 
-  /* ---------- step 2: pull the card out ---------- */
-  let mode = null;            // "pull" | "rotate"
+  let mode = null;
   let lastX = 0, lastY = 0;
   let startY = 0;
   let pullPx = 0;
@@ -446,10 +994,7 @@
   }
 
   function completePull() {
-    // measure where the card is while still inside the envelope
     const first = cardHolder.getBoundingClientRect();
-
-    // move card out of the envelope so the fading envelope can't hide it
     document.getElementById("stage").appendChild(cardHolder);
     cardHolder.classList.add("docked");
     cardHolder.style.transition = "none";
@@ -458,7 +1003,6 @@
 
     setState("floating");
 
-    // FLIP: animate from old visual position to the docked center position
     const last = cardHolder.getBoundingClientRect();
     const dx = first.left - last.left;
     const dy = first.top - last.top;
@@ -485,14 +1029,12 @@
     pullPx = 0;
   }
 
-  /* ---------- step 3: rotate / flip ---------- */
   function applyRotation() {
     cardInner.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   }
 
   function snapRotation() {
-    const target = Math.round(rotY / 180) * 180;
-    rotY = target;
+    rotY = Math.round(rotY / 180) * 180;
     rotX = 0;
     applyRotation();
   }
@@ -503,7 +1045,6 @@
     applyRotation();
   }
 
-  /* ---------- download card images ---------- */
   function downloadImage(href, name) {
     const a = document.createElement("a");
     a.href = href;
@@ -521,8 +1062,8 @@
     downloadImage("反面.jpg", "贺卡-反面.jpg");
   });
 
-  /* ---------- unified pointer handling ---------- */
   cardHolder.addEventListener("pointerdown", (e) => {
+    if (body.dataset.stage !== "card") return;
     if (state === "opened") {
       mode = "pull";
       startY = e.clientY;
@@ -549,8 +1090,8 @@
     moved += Math.abs(dx) + Math.abs(dy);
 
     if (mode === "pull") {
-      const delta = e.clientY - startY; // positive = down
-      applyPull(Math.min(0, delta));    // only allow upward
+      const delta = e.clientY - startY;
+      applyPull(Math.min(0, delta));
     } else if (mode === "rotate") {
       rotY += dx * 0.55;
       rotX = Math.max(-28, Math.min(28, rotX - dy * 0.25));
@@ -569,7 +1110,6 @@
       cardHolder.style.transition = "";
       const cardH = cardHolder.offsetHeight;
       if (moved < 10) {
-        // treated as click -> auto pull
         completePull();
       } else if (-pullPx > cardH * 0.38) {
         completePull();
@@ -580,16 +1120,15 @@
       cardHolder.classList.remove("dragging");
       cardInner.classList.remove("dragging");
       if (moved < 8) {
-        flip();                 // click without drag -> flip
+        flip();
       } else {
-        snapRotation();         // release -> settle to nearest face
+        snapRotation();
       }
     }
   }
   cardHolder.addEventListener("pointerup", endPointer);
   cardHolder.addEventListener("pointercancel", endPointer);
 
-  /* ---------- confetti ---------- */
   function burstConfetti() {
     const emojis = ["🎂", "✨", "🎀", "🥳", "💛", "🌸", "🎉"];
     const cx = window.innerWidth / 2;
@@ -611,7 +1150,6 @@
     }
   }
 
-  /* ---------- init ---------- */
   applyRotation();
 })();
 </script>
