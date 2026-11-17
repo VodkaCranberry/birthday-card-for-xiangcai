@@ -1110,7 +1110,7 @@
       </button>
 
       <button class="spot spot-envelope" id="envelopeSpot" data-clue="envelope" type="button" aria-label="神秘信封" disabled>
-        💌<span class="tag">密信？</span>
+        ✉️<span class="tag">密信？</span>
       </button>
 
       <div class="clue-toast" id="clueToast" role="status"></div>
@@ -1128,7 +1128,7 @@
   <!-- ========== STAGE 2.5: DECODE / KEYPAD ========== -->
   <div class="decode-screen" id="decodeScreen">
     <div class="decode-box">
-      <div class="mini-seal" aria-hidden="true">💌</div>
+      <div class="mini-seal" aria-hidden="true">✉️</div>
       <h2>密信被密码锁住了</h2>
       <p class="hint-line">火漆背面刻着提示：<br>输入<b>密件上的日期（月月日日）</b></p>
       <div class="code-display" id="codeDisplay">
@@ -1157,7 +1157,7 @@
   </div>
 
   <!-- ========== STAGE 3: CARD ========== -->
-  <div class="corner-note">给 香 菜 诡 秘 · 12.01 生 日 快 乐</div>
+  <div class="corner-note">给 香 菜 诡 秘 · 生 日 快 乐</div>
 
   <div class="stage" id="stage">
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="打开信封">
@@ -1235,7 +1235,7 @@
         { speaker: "黄师傅", text: "背面一行小字：<b>「最好的闺蜜，香菜诡秘。」</b>……写得肉麻，但我签的字。" },
         { speaker: "你", text: "「最好的闺蜜」……行吧，看在这行字的份上，奶茶渍的事不跟你计较。",
           choices: [
-            { label: "「这张照片什么时候拍的？」", reply: { speaker: "黄师傅", text: "我们去泉州簪花那次呀——你顶着满头的花，笑得比花还张扬，我按快门都来不及。" } },
+            { label: "「这张照片什么时候拍的？」", reply: { speaker: "黄师傅", text: "我们去泉州簪花那次呀——是叶子女王帮我们拍的。你顶着满头的花，笑得比花还张扬。" } },
             { label: "「下次拍张好看的！」", reply: { speaker: "黄师傅", text: "成交。前提是你先找到礼物，心情好，照片才好看。" } },
           ] },
         { speaker: "旁白", text: "第二段回忆：<b>最好的闺蜜</b>——有人把这四个字，郑重其事地压在了玻璃后面。" },
@@ -1286,7 +1286,7 @@
       ],
     },
     envelope: {
-      icon: "💌",
+      icon: "✉️",
       chip: "密信",
       objective: "点开房间正中央的密信",
       lines: [
@@ -1552,7 +1552,7 @@
         investObjective.textContent = "五段回忆已集齐——点开房间正中央的密信";
         envelopeSpot.classList.add("ready");
         envelopeSpot.disabled = false;
-        showToast(`<strong>五段回忆集齐</strong>房间正中央的空气漾了一下……<span class="ok">💌 密信现身了！</span>`);
+        showToast(`<strong>五段回忆集齐</strong>房间正中央的空气漾了一下……<span class="ok">✉️ 密信现身了！</span>`);
         burstConfetti();
       } else {
         updateObjective();
