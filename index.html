@@ -1062,7 +1062,7 @@
       <div class="case-stamp">机密<br>CONFIDENTIAL</div>
       <div class="case-meta">Case File · No. 1201</div>
       <h1>失踪的生日密件</h1>
-      <div class="case-sub">代号「香菜」 · 完整故事线</div>
+      <div class="case-sub">代号「香菜」</div>
       <div class="vn-box">
         <div class="vn-speaker" id="vnSpeaker"></div>
         <div class="vn-text" id="vnText" title="点击跳过打字"></div>
@@ -1070,7 +1070,6 @@
       </div>
       <div class="case-foot">
         EVIDENCE FIRST · SURPRISE LATER
-        <button class="vn-skip" id="vnSkip" type="button">跳过剧情 ▸</button>
       </div>
     </div>
   </div>
@@ -1312,7 +1311,6 @@
   const vnSpeaker = document.getElementById("vnSpeaker");
   const vnText = document.getElementById("vnText");
   const vnChoices = document.getElementById("vnChoices");
-  const vnSkip = document.getElementById("vnSkip");
 
   function birthdayLine() {
     return "今天，12 月 1 日，就是你的生日！";
@@ -1420,8 +1418,6 @@
       vnChoices.appendChild(b);
     });
   }
-
-  vnSkip.addEventListener("click", () => setStage("investigate"));
 
   /* ================= INVESTIGATE (ordered story scenes) ================= */
   function showToast(html) {
