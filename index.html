@@ -1309,19 +1309,13 @@
   }
 
   /* ================= INTERACTIVE STORY (VN) ================= */
-  const BIRTHDAY_AT = new Date(2026, 11, 1, 0, 0, 0).getTime(); // 2026-12-01 local
   const vnSpeaker = document.getElementById("vnSpeaker");
   const vnText = document.getElementById("vnText");
   const vnChoices = document.getElementById("vnChoices");
   const vnSkip = document.getElementById("vnSkip");
 
   function birthdayLine() {
-    const now = new Date();
-    if (now.getMonth() === 11 && now.getDate() === 1) {
-      return "今天，12 月 1 日，就是你的生日！";
-    }
-    const days = Math.max(0, Math.ceil((BIRTHDAY_AT - now.getTime()) / 86400000));
-    return `12 月 1 日就是你的生日${days > 0 ? `（还有 ${days} 天）` : ""}。`;
+    return "今天，12 月 1 日，就是你的生日！";
   }
 
   const STORY = {
