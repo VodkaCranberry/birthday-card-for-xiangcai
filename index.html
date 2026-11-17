@@ -1560,6 +1560,7 @@
 
   /* ================= DECODE KEYPAD ================= */
   const CODE = "1201"; // 12月1日 MMDD
+  const EGG = "0426"; // 彩蛋密码
   const codeSlots = Array.from(document.querySelectorAll("#codeDisplay .code-slot"));
   const codeDisplay = document.getElementById("codeDisplay");
   const codeMsg = document.getElementById("codeMsg");
@@ -1581,6 +1582,14 @@
   }
 
   function checkCode() {
+    if (entered === EGG) {
+      codeMsg.style.color = "var(--gold)";
+      codeMsg.textContent = "怎么，迫不及待想给我过生日了？";
+      burstConfetti();
+      entered = "";
+      renderCode();
+      return;
+    }
     if (entered === CODE) {
       codeMsg.style.color = "var(--clue)";
       codeMsg.textContent = "✓ 密码正确——火漆熔化了！";
