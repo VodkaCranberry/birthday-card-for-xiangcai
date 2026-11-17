@@ -175,6 +175,108 @@
     color: #9a8b6a;
     letter-spacing: .14em;
   }
+  .case-file {
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    touch-action: pan-y;
+  }
+
+  /* ---- visual-novel dialogue ---- */
+  .vn-box {
+    border-top: 1px dashed #c9b892;
+    padding-top: 14px;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+  }
+  .vn-speaker {
+    display: inline-block;
+    align-self: flex-start;
+    background: linear-gradient(180deg, #2f3a52, #1e2638);
+    color: #f0e6d0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    padding: 4px 12px;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 0;
+    animation: line-in .3s both;
+  }
+  .vn-text {
+    background: rgba(255, 255, 255, .55);
+    border: 1px solid #d9c9a4;
+    border-top: none;
+    border-radius: 0 8px 8px 8px;
+    padding: 13px 14px;
+    font-size: clamp(14px, 3.6vw, 15.5px);
+    line-height: 1.85;
+    color: #4a3f35;
+    min-height: 96px;
+    cursor: pointer;
+    animation: line-in .3s .05s both;
+  }
+  .vn-text b { color: #b03050; }
+  .vn-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: #b03050;
+    margin-left: 2px;
+    vertical-align: -0.12em;
+    animation: caret-blink .8s steps(1) infinite;
+  }
+  @keyframes caret-blink { 50% { opacity: 0; } }
+  .vn-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 13px;
+  }
+  .vn-choice {
+    text-align: left;
+    border: 1.5px solid #c9b892;
+    background: #fffdf6;
+    color: #4a3f35;
+    font: inherit;
+    font-size: clamp(14px, 3.5vw, 15px);
+    line-height: 1.55;
+    padding: 12px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, transform .12s;
+    animation: line-in .4s both;
+  }
+  .vn-choice:hover {
+    border-color: #b03050;
+    background: #fdf3f5;
+  }
+  .vn-choice:active { transform: scale(.98); }
+  .vn-choice.primary {
+    background: linear-gradient(180deg, #2f3a52, #1e2638);
+    border-color: transparent;
+    color: #f0e6d0;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-align: center;
+    box-shadow: 0 8px 20px -8px rgba(0,0,0,.5);
+  }
+  .vn-choice.primary:hover { filter: brightness(1.12); background: linear-gradient(180deg, #2f3a52, #1e2638); }
+  .vn-choice .tag-ok { color: #1f9d55; font-weight: 800; }
+  .vn-choice .tag-no { color: #b03050; font-weight: 700; }
+  .vn-skip {
+    display: block;
+    margin: 8px auto 0;
+    border: none;
+    background: none;
+    color: #b0a080;
+    font: inherit;
+    font-size: 10.5px;
+    letter-spacing: .16em;
+    cursor: pointer;
+    padding: 4px 8px;
+    opacity: .75;
+  }
+  .vn-skip:hover { color: #b03050; opacity: 1; }
 
   /* ============ INVESTIGATE ============ */
   .invest-screen {
@@ -912,21 +1014,22 @@
 </head>
 <body data-stage="story" data-state="closed">
 
-  <!-- ========== STAGE 1: STORY ========== -->
+  <!-- ========== STAGE 1: STORY (interactive VN) ========== -->
   <div class="story-screen" id="storyScreen">
     <div class="case-file">
       <div class="case-stamp">机密<br>CONFIDENTIAL</div>
       <div class="case-meta">Case File · No. 1201</div>
       <h1>失踪的生日密件</h1>
-      <div class="case-sub">代号「香菜」 · 特别搜查令</div>
-      <div class="case-body">
-        <p>致 调查员 <span class="hl">香菜诡秘</span>：</p>
-        <p id="caseDateLine">12 月 1 日就是你的生日。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。</p>
-        <p>现场只留下一句暗语：<span class="hl">「先找到三条线索，密信自会现身。」</span></p>
-        <p>仔细搜查每一件物品。祝你好运，侦探。</p>
+      <div class="case-sub">代号「香菜」 · 互动剧情</div>
+      <div class="vn-box">
+        <div class="vn-speaker" id="vnSpeaker"></div>
+        <div class="vn-text" id="vnText" title="点击跳过打字"></div>
+        <div class="vn-choices" id="vnChoices"></div>
       </div>
-      <button class="start-btn" id="startBtn" type="button">🔍 进入现场 · 开始调查</button>
-      <div class="case-foot">EVIDENCE FIRST · SURPRISE LATER</div>
+      <div class="case-foot">
+        EVIDENCE FIRST · SURPRISE LATER
+        <button class="vn-skip" id="vnSkip" type="button">跳过剧情 ▸</button>
+      </div>
     </div>
   </div>
 
@@ -1034,7 +1137,6 @@
   const body = document.body;
   const storyScreen = document.getElementById("storyScreen");
   const investScreen = document.getElementById("investScreen");
-  const startBtn = document.getElementById("startBtn");
   const clueCountEl = document.getElementById("clueCount");
   const clueToast = document.getElementById("clueToast");
   const envelopeSpot = document.getElementById("envelopeSpot");
@@ -1086,23 +1188,6 @@
     },
   };
 
-  /* ================= DATE LINE ================= */
-  const BIRTHDAY_AT = new Date(2026, 11, 1, 0, 0, 0).getTime(); // 2026-12-01 local
-
-  function updateDateLine() {
-    const line = document.getElementById("caseDateLine");
-    if (!line) return;
-    const now = new Date();
-    const isBday = now.getMonth() === 11 && now.getDate() === 1;
-    if (isBday) {
-      line.innerHTML =
-        '<span class="hl">今天，12 月 1 日，就是你的生日！</span> 黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。';
-    } else {
-      const days = Math.max(0, Math.ceil((BIRTHDAY_AT - now.getTime()) / 86400000));
-      line.innerHTML = `12 月 1 日就是你的生日${days > 0 ? `（还有 ${days} 天）` : ""}。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。`;
-    }
-  }
-
   /* ================= STAGE MACHINE ================= */
   function setStage(name) {
     body.dataset.stage = name;
@@ -1112,9 +1197,187 @@
     }
   }
 
-  startBtn.addEventListener("click", () => {
-    setStage("investigate");
-  });
+  /* ================= INTERACTIVE STORY (VN) ================= */
+  const BIRTHDAY_AT = new Date(2026, 11, 1, 0, 0, 0).getTime(); // 2026-12-01 local
+  const vnSpeaker = document.getElementById("vnSpeaker");
+  const vnText = document.getElementById("vnText");
+  const vnChoices = document.getElementById("vnChoices");
+  const vnSkip = document.getElementById("vnSkip");
+
+  function birthdayLine() {
+    const now = new Date();
+    if (now.getMonth() === 11 && now.getDate() === 1) {
+      return "今天，12 月 1 日，就是你的生日！";
+    }
+    const days = Math.max(0, Math.ceil((BIRTHDAY_AT - now.getTime()) / 86400000));
+    return `12 月 1 日就是你的生日${days > 0 ? `（还有 ${days} 天）` : ""}。`;
+  }
+
+  const STORY = {
+    intro: {
+      speaker: "黄师傅 · 加密留言",
+      text: `调查员 <b>香菜诡秘</b>：当你读到这封密件时，${birthdayLine()}我，黄师傅，把一份「神秘礼物」藏进了这间屋子。但规矩是——先证明你配得上它。`,
+      choices: [
+        { label: "「谁稀罕……我偏要找到给你看！」", next: "r_bone" },
+        { label: "「黄师傅又在故弄玄虚？」", next: "r_tease" },
+        { label: "「找到的话，奶茶你请！」", next: "r_milk" },
+      ],
+    },
+    r_bone: {
+      speaker: "你",
+      text: "很好，有骨气。不过上次是谁把保险箱密码猜错三次来着？……是是是，那都是意外。",
+      choices: [{ label: "别翻旧账了，出题吧！", next: "puzzle" }],
+    },
+    r_tease: {
+      speaker: "你",
+      text: "故弄玄虚？这叫仪式感，侦探小姐。没有仪式感的礼物，和咸鱼有什么区别。",
+      choices: [{ label: "行行行，那我接招。", next: "puzzle" }],
+    },
+    r_milk: {
+      speaker: "你",
+      text: "成交！不过前提是你得先破得了我的谜——破不了，奶茶自己买。",
+      choices: [{ label: "谁怕谁，出题！", next: "puzzle" }],
+    },
+    puzzle: {
+      speaker: "第一关 · 文字游戏",
+      text: "我有一样东西：<b>12 月 1 日之前碰不得</b>；打开第一眼是「快乐」，翻过来第二眼是「祝福」。——打一物。",
+      choices: [
+        { label: "圣诞礼物 🎄", next: "p_wrong1" },
+        { label: "生日贺卡 💌", next: "p_right" },
+        { label: "考试成绩单 📋", next: "p_wrong2" },
+      ],
+    },
+    p_wrong1: {
+      speaker: "第一关 · 文字游戏",
+      text: "圣诞礼物？那是 12 月 25 日的事……你日历翻错了，重来。",
+      choices: [{ label: "再想想……", next: "puzzle" }],
+    },
+    p_wrong2: {
+      speaker: "第一关 · 文字游戏",
+      text: "……你在咒谁？本侦探不接受这种联想。",
+      choices: [{ label: "重新审题", next: "puzzle" }],
+    },
+    p_right: {
+      speaker: "第一关 · 文字游戏",
+      text: '聪明！盖章 <b>「解谜达人」</b> ✓——不过别得意，第二关才真正开始。',
+      choices: [{ label: "放马过来 ▸", next: "puzzle2" }],
+    },
+    puzzle2: {
+      speaker: "第二关 · 暗语补全",
+      text: "黄师傅的暗语只说了一半：<br>「先找到三条线索，______。」<br>——下半句是什么？",
+      choices: [
+        { label: "「礼物就会长腿跑掉」", next: "q_wrong1" },
+        { label: "「密信自会现身」", next: "q_right" },
+        { label: "「奶茶就要凉了」", next: "q_wrong2" },
+      ],
+    },
+    q_wrong1: {
+      speaker: "第二关 · 暗语补全",
+      text: "礼物又不是猫，长不了腿……提示：这半句，你进场之后还会再听到一次。",
+      choices: [{ label: "再补一次", next: "puzzle2" }],
+    },
+    q_wrong2: {
+      speaker: "第二关 · 暗语补全",
+      text: "奶茶凉不凉不重要——重要的是，你到底有没有认真听。",
+      choices: [{ label: "这次认真补", next: "puzzle2" }],
+    },
+    q_right: {
+      speaker: "第二关 · 暗语补全",
+      text: '正确！<b>「先找到三条线索，密信自会现身。」</b><br>收好这句咒语——最后一关，选择你的装备。',
+      choices: [
+        { label: "🔍 放大镜——细节控", next: "eq_glass" },
+        { label: "📓 记录本——好记性不如烂笔头", next: "eq_book" },
+        { label: "🧋 冰奶茶——体力也是实力", next: "eq_tea" },
+      ],
+    },
+    eq_glass: {
+      speaker: "你",
+      text: "细节控。那些藏在灯罩底下、压在相框背面的小纸条，逃不过你的眼睛。",
+      choices: [{ label: "装备就绪 ▸", next: "briefing" }],
+    },
+    eq_book: {
+      speaker: "你",
+      text: "好习惯。厉害的侦探都写笔记——线索集齐之前，一条都别漏。",
+      choices: [{ label: "装备就绪 ▸", next: "briefing" }],
+    },
+    eq_tea: {
+      speaker: "你",
+      text: "……也行。边喝边查，查完正好举杯庆祝——两不耽误。",
+      choices: [{ label: "装备就绪 ▸", next: "briefing" }],
+    },
+    briefing: {
+      speaker: "黄师傅 · 最后一条消息",
+      text: "最后提醒：现场有五件可疑物品，<b>集齐三条线索，密信自会现身</b>。密码嘛……就藏在线索里。<br>祝你好运，12 月 1 日见。",
+      choices: [{ label: "🔍 进入现场 · 开始调查", next: "__start__", primary: true }],
+    },
+  };
+
+  let typeTimer = null;
+  let typeDone = null;
+  let typeFull = "";
+
+  function typeHtml(el, html, done) {
+    clearTimeout(typeTimer);
+    typeFull = html;
+    typeDone = done;
+    el.innerHTML = "";
+    const tokens = html.match(/<[^>]+>|[\s\S]/g) || [];
+    let i = 0;
+    let buf = "";
+    const step = () => {
+      if (i >= tokens.length) {
+        el.innerHTML = buf;
+        const d = typeDone;
+        typeDone = null;
+        if (d) d();
+        return;
+      }
+      const t = tokens[i++];
+      buf += t;
+      el.innerHTML = buf + '<span class="vn-caret"></span>';
+      typeTimer = setTimeout(step, t.charAt(0) === "<" ? 0 : 16);
+    };
+    step();
+  }
+
+  function skipType() {
+    if (!typeDone) return;
+    clearTimeout(typeTimer);
+    vnText.innerHTML = typeFull;
+    const d = typeDone;
+    typeDone = null;
+    if (d) d();
+  }
+  vnText.addEventListener("click", skipType);
+
+  function showNode(id) {
+    const node = STORY[id];
+    if (!node) return;
+    vnChoices.innerHTML = "";
+    vnSpeaker.textContent = node.speaker;
+    typeHtml(vnText, node.text, () => renderChoices(node.choices));
+  }
+
+  function renderChoices(choices) {
+    vnChoices.innerHTML = "";
+    choices.forEach((c, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "vn-choice" + (c.primary ? " primary" : "");
+      b.textContent = c.label;
+      b.style.animationDelay = idx * 0.07 + "s";
+      b.addEventListener("click", () => {
+        if (c.next === "__start__") {
+          setStage("investigate");
+          return;
+        }
+        showNode(c.next);
+      });
+      vnChoices.appendChild(b);
+    });
+  }
+
+  vnSkip.addEventListener("click", () => setStage("investigate"));
 
   /* ================= INVESTIGATE ================= */
   function showToast(html) {
@@ -1438,7 +1701,7 @@
   applyRotation();
 
   /* ================= BOOT ================= */
-  updateDateLine();
+  showNode("intro");
 })();
 </script>
 </body>
