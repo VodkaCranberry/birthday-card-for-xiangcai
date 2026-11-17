@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>给香菜诡秘的生日密件 🕵️</title>
+<title>给香菜诡秘的生日密件 · 12.01 🔐</title>
 <style>
   :root {
     --paper: #fdf7ee;
@@ -53,22 +53,162 @@
     z-index: 1;
   }
 
-  /* stage visibility: story → investigate → card */
+  /* ===== stage visibility: seal → story → investigate → decode → card ===== */
+  .seal-screen, .story-screen, .invest-screen, .decode-screen { display: none !important; }
+  body[data-stage="seal"]        .seal-screen   { display: grid !important; }
+  body[data-stage="story"]       .story-screen  { display: grid !important; }
+  body[data-stage="investigate"] .invest-screen { display: flex !important; }
+  body[data-stage="decode"]      .decode-screen { display: grid !important; }
   body:not([data-stage="card"]) .stage { display: none; }
-  body[data-stage="card"] .story-screen,
-  body[data-stage="card"] .invest-screen { display: none !important; }
-  body:not([data-stage="investigate"]) .invest-screen { display: none !important; }
-  body[data-stage="investigate"] .story-screen { display: none !important; }
   body:not([data-stage="card"]) .hint,
   body:not([data-stage="card"]) .actions { display: none !important; }
-  body:not([data-stage="story"]) .corner-note { display: none; }
+  body[data-stage="story"] .credit,
+  body[data-stage="investigate"] .credit { color: rgba(255,255,255,.4); }
+
+  /* ============ SEAL / COUNTDOWN ============ */
+  .seal-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 12%, rgba(232, 197, 106, .14), transparent 60%),
+      linear-gradient(165deg, #0e1320 0%, var(--case) 50%, #0b0e16 100%);
+    overflow: auto;
+    touch-action: pan-y;
+  }
+  .seal-box {
+    width: min(420px, 100%);
+    text-align: center;
+    color: #efe6d2;
+  }
+  .seal-box .meta {
+    font-size: 11px;
+    letter-spacing: .3em;
+    color: rgba(232,197,106,.75);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .big-seal {
+    width: clamp(96px, 26vmin, 132px);
+    height: clamp(96px, 26vmin, 132px);
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ef7f97, var(--seal) 55%, #a83a54);
+    box-shadow: 0 14px 36px -8px rgba(140, 40, 70, .7),
+                inset 0 3px 6px rgba(255,255,255,.4),
+                inset 0 -6px 14px rgba(0,0,0,.28);
+    display: grid;
+    place-items: center;
+    font-size: clamp(38px, 10vmin, 54px);
+    position: relative;
+    animation: seal-breathe 3s ease-in-out infinite;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .big-seal::after {
+    content: "12·01";
+    position: absolute;
+    inset: 14px;
+    border: 2px dashed rgba(255,255,255,.55);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: clamp(13px, 3.4vmin, 16px);
+    font-weight: 800;
+    letter-spacing: .12em;
+    color: rgba(255,255,255,.92);
+    font-family: Georgia, serif;
+  }
+  @keyframes seal-breathe {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(212,82,110,.35)); }
+    50%      { transform: scale(1.04); filter: drop-shadow(0 0 26px rgba(212,82,110,.75)); }
+  }
+  .seal-box h1 {
+    font-size: clamp(21px, 5.6vw, 26px);
+    letter-spacing: .1em;
+    margin-bottom: 8px;
+    color: #f4ecd8;
+  }
+  .seal-box .sub {
+    font-size: clamp(13px, 3.4vw, 14.5px);
+    line-height: 1.8;
+    color: rgba(240,232,216,.72);
+    letter-spacing: .06em;
+    margin-bottom: 26px;
+  }
+  .seal-box .sub b { color: var(--gold); }
+  .countdown {
+    display: flex;
+    justify-content: center;
+    gap: clamp(8px, 2.4vw, 14px);
+    margin-bottom: 26px;
+  }
+  .cd-cell {
+    min-width: clamp(64px, 18vw, 82px);
+    background: rgba(0,0,0,.4);
+    border: 1px solid rgba(232,197,106,.4);
+    border-radius: 10px;
+    padding: 12px 6px 9px;
+  }
+  .cd-cell .num {
+    font-size: clamp(26px, 7vw, 34px);
+    font-weight: 800;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .cd-cell .lab {
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: rgba(240,232,216,.55);
+    margin-top: 4px;
+  }
+  .seal-locked {
+    font-size: 13px;
+    letter-spacing: .18em;
+    color: rgba(240,232,216,.55);
+    animation: blink 1.8s ease-in-out infinite;
+  }
+  @keyframes blink { 50% { opacity: .35; } }
+  .seal-unlock-btn {
+    display: none;
+    width: 100%;
+    border: none;
+    background: linear-gradient(180deg, #d4587a, #b03a5a);
+    color: #fff;
+    font: inherit;
+    font-size: clamp(16px, 4vw, 18px);
+    font-weight: 800;
+    letter-spacing: .24em;
+    padding: 17px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 14px 34px -10px rgba(212, 82, 110, .8);
+    transition: transform .15s, filter .2s;
+    animation: unlock-pop .6s cubic-bezier(.2, 1.4, .4, 1) both;
+  }
+  .seal-unlock-btn:hover { filter: brightness(1.1); }
+  .seal-unlock-btn:active { transform: scale(.97); }
+  @keyframes unlock-pop { from { transform: scale(.8); opacity: 0; } }
+  .seal-screen.unlocked .seal-locked { display: none; }
+  .seal-screen.unlocked .seal-unlock-btn { display: block; }
+  .seal-screen.unlocked .countdown { opacity: .4; }
+  .seal-foot {
+    margin-top: 20px;
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    color: rgba(240,232,216,.35);
+  }
 
   /* ============ STORY ============ */
   .story-screen {
     position: fixed;
     inset: 0;
     z-index: 40;
-    display: grid;
     place-items: center;
     padding: 24px;
     background:
@@ -86,7 +226,9 @@
     box-shadow: 0 30px 60px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.08);
     position: relative;
     transform: rotate(-.4deg);
+    animation: file-in .7s cubic-bezier(.2, .9, .3, 1) both;
   }
+  @keyframes file-in { from { opacity: 0; transform: rotate(-.4deg) translateY(26px); } }
   .case-file::before {
     content: "";
     position: absolute;
@@ -94,8 +236,6 @@
     width: 64px; height: 64px;
     border: 3px solid rgba(196, 60, 80, .55);
     border-radius: 50%;
-    display: grid;
-    place-items: center;
   }
   .case-stamp {
     position: absolute;
@@ -141,7 +281,13 @@
     padding-top: 14px;
     margin-bottom: 22px;
   }
+  .case-body p { animation: line-in .6s both; }
+  .case-body p:nth-child(1) { animation-delay: .25s; }
+  .case-body p:nth-child(2) { animation-delay: .55s; }
+  .case-body p:nth-child(3) { animation-delay: .9s; }
+  .case-body p:nth-child(4) { animation-delay: 1.25s; }
   .case-body p + p { margin-top: .75em; }
+  @keyframes line-in { from { opacity: 0; transform: translateY(8px); } }
   .case-body .hl { color: #b03050; font-weight: 700; }
   .start-btn {
     width: 100%;
@@ -157,6 +303,7 @@
     cursor: pointer;
     box-shadow: 0 8px 20px -8px rgba(0,0,0,.5);
     transition: transform .15s, filter .2s;
+    animation: line-in .6s 1.5s both;
   }
   .start-btn:hover { filter: brightness(1.1); }
   .start-btn:active { transform: scale(.97); }
@@ -173,18 +320,16 @@
     position: fixed;
     inset: 0;
     z-index: 40;
-    display: flex;
     flex-direction: column;
     background: linear-gradient(180deg, #2a3148 0%, #3a3348 55%, #4a3a40 100%);
     touch-action: none;
   }
-  .invest-screen[hidden] { display: none !important; }
   .invest-hud {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+    padding: max(12px, env(safe-area-inset-top)) 16px 8px;
     color: #f0e8d8;
     z-index: 5;
     flex: 0 0 auto;
@@ -213,6 +358,36 @@
     letter-spacing: .08em;
     white-space: nowrap;
   }
+
+  /* evidence strip */
+  .evidence-strip {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 8px;
+    overflow-x: auto;
+    flex: 0 0 auto;
+    z-index: 5;
+    min-height: 0;
+    scrollbar-width: none;
+  }
+  .evidence-strip:empty { display: none; }
+  .evidence-strip::-webkit-scrollbar { display: none; }
+  .ev-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(247, 241, 228, .12);
+    border: 1px solid rgba(232,197,106,.5);
+    color: #f0e6d0;
+    font-size: 11.5px;
+    letter-spacing: .06em;
+    padding: 5px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+    animation: chip-in .45s cubic-bezier(.2, 1.3, .4, 1) both;
+    flex: 0 0 auto;
+  }
+  @keyframes chip-in { from { opacity: 0; transform: scale(.7); } }
 
   .room {
     position: relative;
@@ -438,6 +613,129 @@
   }
   .clue-toast .ok { color: var(--clue); font-weight: 700; }
   .clue-toast .warn { color: #f0a0b0; font-weight: 700; }
+
+  /* ============ DECODE / KEYPAD ============ */
+  .decode-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    place-items: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 15%, rgba(212, 82, 110, .14), transparent 60%),
+      linear-gradient(165deg, #10141f 0%, var(--case) 55%, #0c0f17 100%);
+    overflow: auto;
+    touch-action: pan-y;
+  }
+  .decode-box {
+    width: min(360px, 100%);
+    text-align: center;
+    color: #efe6d2;
+    animation: file-in .55s cubic-bezier(.2, .9, .3, 1) both;
+  }
+  .decode-box .mini-seal {
+    width: clamp(72px, 20vmin, 96px);
+    height: clamp(72px, 20vmin, 96px);
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ef7f97, var(--seal) 55%, #a83a54);
+    box-shadow: 0 12px 30px -8px rgba(140, 40, 70, .7), inset 0 3px 6px rgba(255,255,255,.4);
+    display: grid;
+    place-items: center;
+    font-size: clamp(32px, 9vmin, 44px);
+  }
+  .decode-box h2 {
+    font-size: clamp(19px, 5vw, 23px);
+    letter-spacing: .12em;
+    margin-bottom: 6px;
+    color: #f4ecd8;
+  }
+  .decode-box .hint-line {
+    font-size: clamp(13px, 3.4vw, 14px);
+    line-height: 1.7;
+    color: rgba(240,232,216,.7);
+    letter-spacing: .05em;
+    margin-bottom: 18px;
+  }
+  .decode-box .hint-line b { color: var(--gold); }
+  .code-display {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .code-slot {
+    width: clamp(46px, 13vw, 56px);
+    height: clamp(54px, 15vw, 64px);
+    background: rgba(0,0,0,.45);
+    border: 1.5px solid rgba(232,197,106,.45);
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: clamp(24px, 7vw, 30px);
+    font-weight: 800;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+  }
+  .code-slot.filled {
+    border-color: var(--gold);
+    box-shadow: 0 0 14px -4px rgba(232,197,106,.7);
+    animation: slot-pop .25s cubic-bezier(.2, 1.4, .4, 1);
+  }
+  @keyframes slot-pop { from { transform: scale(.8); } }
+  .code-display.shake { animation: shake .45s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-9px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(4px); }
+  }
+  .code-msg {
+    min-height: 20px;
+    font-size: 13px;
+    letter-spacing: .06em;
+    margin-bottom: 14px;
+    color: #f0a0b0;
+    font-weight: 700;
+  }
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 288px;
+    margin: 0 auto;
+  }
+  .key {
+    border: 1px solid rgba(240,232,216,.28);
+    background: rgba(255,255,255,.08);
+    color: #f0e8d8;
+    font: inherit;
+    font-size: clamp(19px, 5.5vw, 22px);
+    font-weight: 700;
+    padding: clamp(11px, 3.4vw, 14px) 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .15s, transform .1s;
+    touch-action: manipulation;
+  }
+  .key:hover { background: rgba(255,255,255,.16); }
+  .key:active { transform: scale(.94); }
+  .key.k-ok {
+    background: linear-gradient(180deg, #d4587a, #b03a5a);
+    border-color: transparent;
+    font-size: clamp(15px, 4vw, 17px);
+    letter-spacing: .1em;
+  }
+  .key.k-ok:hover { filter: brightness(1.1); }
+  .key.k-del { font-size: clamp(14px, 3.8vw, 16px); letter-spacing: .06em; }
+  .decode-foot {
+    margin-top: 16px;
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    color: rgba(240,232,216,.35);
+  }
 
   /* ============ Envelope / Card (existing flow) ============ */
   .envelope {
@@ -723,8 +1021,6 @@
     pointer-events: none;
     white-space: nowrap;
   }
-  body[data-stage="story"] .credit,
-  body[data-stage="investigate"] .credit { color: rgba(255,255,255,.4); }
 
   .confetti {
     position: fixed;
@@ -744,6 +1040,7 @@
     .hint { animation: none; }
     .spot::before { animation: none; }
     .spot-envelope.ready { animation: none; }
+    .big-seal { animation: none; }
   }
 
   @media (max-height: 500px) and (orientation: landscape) {
@@ -752,18 +1049,37 @@
   }
 </style>
 </head>
-<body data-stage="story" data-state="closed">
+<body data-stage="seal" data-state="closed">
+
+  <!-- ========== STAGE 0: SEAL / COUNTDOWN ========== -->
+  <div class="seal-screen" id="sealScreen">
+    <div class="seal-box">
+      <div class="meta">Classified · No.1201</div>
+      <div class="big-seal" id="bigSeal" aria-label="火漆封印"></div>
+      <h1>生日密件 · 已封存</h1>
+      <p class="sub">调查员 香菜诡秘：<br>你的密件已被火漆封印，<br><b>2026 年 12 月 1 日 00:00</b> 准时解封。</p>
+      <div class="countdown" id="countdown">
+        <div class="cd-cell"><div class="num" id="cdD">--</div><div class="lab">DAY</div></div>
+        <div class="cd-cell"><div class="num" id="cdH">--</div><div class="lab">HOUR</div></div>
+        <div class="cd-cell"><div class="num" id="cdM">--</div><div class="lab">MIN</div></div>
+        <div class="cd-cell"><div class="num" id="cdS">--</div><div class="lab">SEC</div></div>
+      </div>
+      <div class="seal-locked" id="sealLocked">— 密 件 封 存 中 —</div>
+      <button class="seal-unlock-btn" id="sealUnlockBtn" type="button">🔥 启封 · 阅览密件</button>
+      <div class="seal-foot">HOLD THE SEAL · 黄师傅的预览通道</div>
+    </div>
+  </div>
 
   <!-- ========== STAGE 1: STORY ========== -->
   <div class="story-screen" id="storyScreen">
     <div class="case-file">
       <div class="case-stamp">机密<br>CONFIDENTIAL</div>
-      <div class="case-meta">Case File · No. 1115</div>
+      <div class="case-meta">Case File · No. 1201</div>
       <h1>失踪的生日密件</h1>
       <div class="case-sub">代号「香菜」 · 特别搜查令</div>
       <div class="case-body">
         <p>致 调查员 <span class="hl">香菜诡秘</span>：</p>
-        <p>明天就是你的生日。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。</p>
+        <p id="caseDateLine">12 月 1 日就是你的生日。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。</p>
         <p>现场只留下一句暗语：<span class="hl">「先找到三条线索，密信自会现身。」</span></p>
         <p>仔细搜查每一件物品。祝你好运，侦探。</p>
       </div>
@@ -773,7 +1089,7 @@
   </div>
 
   <!-- ========== STAGE 2: INVESTIGATE ========== -->
-  <div class="invest-screen" id="investScreen" hidden>
+  <div class="invest-screen" id="investScreen">
     <div class="invest-hud">
       <div class="invest-title">
         现场搜查中
@@ -781,6 +1097,8 @@
       </div>
       <div class="clue-pill">线索 <span id="clueCount">0</span> / 3</div>
     </div>
+
+    <div class="evidence-strip" id="evidenceStrip"></div>
 
     <div class="room" id="room">
       <div class="furn furn-window"></div>
@@ -812,8 +1130,39 @@
     </div>
   </div>
 
+  <!-- ========== STAGE 2.5: DECODE / KEYPAD ========== -->
+  <div class="decode-screen" id="decodeScreen">
+    <div class="decode-box">
+      <div class="mini-seal" aria-hidden="true">💌</div>
+      <h2>密信被密码锁住了</h2>
+      <p class="hint-line">火漆背面刻着提示：<br>输入<b>密件上的日期（月月日日）</b></p>
+      <div class="code-display" id="codeDisplay">
+        <div class="code-slot">_</div>
+        <div class="code-slot">_</div>
+        <div class="code-slot">_</div>
+        <div class="code-slot">_</div>
+      </div>
+      <div class="code-msg" id="codeMsg"></div>
+      <div class="keypad" id="keypad">
+        <button class="key" data-k="1" type="button">1</button>
+        <button class="key" data-k="2" type="button">2</button>
+        <button class="key" data-k="3" type="button">3</button>
+        <button class="key" data-k="4" type="button">4</button>
+        <button class="key" data-k="5" type="button">5</button>
+        <button class="key" data-k="6" type="button">6</button>
+        <button class="key" data-k="7" type="button">7</button>
+        <button class="key" data-k="8" type="button">8</button>
+        <button class="key" data-k="9" type="button">9</button>
+        <button class="key k-del" data-k="del" type="button">⌫ 删除</button>
+        <button class="key" data-k="0" type="button">0</button>
+        <button class="key k-ok" data-k="ok" type="button">确 定</button>
+      </div>
+      <div class="decode-foot">CODE · MMDD · CASE 1201</div>
+    </div>
+  </div>
+
   <!-- ========== STAGE 3: CARD ========== -->
-  <div class="corner-note">给 香 菜 诡 秘 · 生 日 快 乐</div>
+  <div class="corner-note">给 香 菜 诡 秘 · 12.01 生 日 快 乐</div>
 
   <div class="stage" id="stage">
     <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="打开信封">
@@ -847,53 +1196,135 @@
   const clueCountEl = document.getElementById("clueCount");
   const clueToast = document.getElementById("clueToast");
   const envelopeSpot = document.getElementById("envelopeSpot");
+  const evidenceStrip = document.getElementById("evidenceStrip");
+  const sealScreen = document.getElementById("sealScreen");
+  const sealUnlockBtn = document.getElementById("sealUnlockBtn");
+  const bigSeal = document.getElementById("bigSeal");
+
+  const hint = document.getElementById("hint");
 
   const NEED = 3;
   const found = new Set();
   let toastTimer = null;
 
+  const HINTS = {
+    closed:   "✨ 轻点信封，开启惊喜",
+    opening:  "……",
+    opened:   "☝️ 按住卡片向上拖出（或点一下）",
+    floating: "🖐 用手指旋转看看正反面",
+  };
+
   const CLUES = {
     calendar: {
       title: "线索 · 日历",
-      text: "11 月的某一天被红笔重重圈住，旁边写着一个字：<b>「明」</b>。生日，就在明天。",
+      icon: "📅",
+      text: "12 月 1 日被红笔重重圈住，旁边写着一个字：<b>「今」</b>。生日，就在 12.01。",
     },
     frame: {
       title: "线索 · 相框",
+      icon: "🖼️",
       text: "玻璃相框里是两张笑得毫无形象的脸。背面一行小字：<b>「最好的闺蜜，香菜诡秘。」</b>",
     },
     notebook: {
       title: "线索 · 笔记本",
+      icon: "📓",
       text: "翻开的一页写着：<b>「礼物藏在房间最中央——别被日常晃了眼。」</b> 黄师傅的字迹。",
     },
     lamp: {
       title: "线索 · 台灯",
+      icon: "💡",
       text: "灯罩下压着一张便签：<b>「找到粉红封印了吗？集齐三条线索，它就会出现。」</b>",
     },
     books: {
       title: "线索 · 书架",
+      icon: "📚",
       text: "抽出一本《谜题集》，扉页龙飞凤舞：<b>「黄师傅到此一游 —— 生日快乐！」</b>",
     },
     envelope: {
       title: "★ 密信现身",
+      icon: "💌",
       text: "桌面上凭空浮出一封粉红火漆封印的信……<b>就是它！</b>",
     },
   };
 
-  /* ---------- stage transitions ---------- */
+  /* ================= SEAL / COUNTDOWN ================= */
+  const SEAL_AT = new Date(2026, 11, 1, 0, 0, 0).getTime(); // 2026-12-01 00:00 local
+  const cdD = document.getElementById("cdD");
+  const cdH = document.getElementById("cdH");
+  const cdM = document.getElementById("cdM");
+  const cdS = document.getElementById("cdS");
+  let cdTimer = null;
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  function isSealed() {
+    return Date.now() < SEAL_AT;
+  }
+
+  function tickCountdown() {
+    const diff = SEAL_AT - Date.now();
+    if (diff <= 0) {
+      sealScreen.classList.add("unlocked");
+      clearInterval(cdTimer);
+      return;
+    }
+    const s = Math.floor(diff / 1000);
+    cdD.textContent = String(Math.floor(s / 86400));
+    cdH.textContent = pad2(Math.floor(s / 3600) % 24);
+    cdM.textContent = pad2(Math.floor(s / 60) % 60);
+    cdS.textContent = pad2(s % 60);
+  }
+
+  /* preview: hold the big seal for 1.2s, or ?preview=1 */
+  let holdTimer = null;
+  bigSeal.addEventListener("pointerdown", () => {
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(enterStory, 1200);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach((ev) =>
+    bigSeal.addEventListener(ev, () => clearTimeout(holdTimer))
+  );
+
+  function enterStory() {
+    clearInterval(cdTimer);
+    setStage("story");
+    updateDateLine();
+  }
+
+  function updateDateLine() {
+    const line = document.getElementById("caseDateLine");
+    if (!line) return;
+    const now = new Date();
+    const isBday =
+      now.getMonth() === 11 && now.getDate() === 1;
+    if (isBday) {
+      line.innerHTML =
+        '<span class="hl">今天，12 月 1 日，就是你的生日！</span> 黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。';
+    } else {
+      const days = Math.max(
+        0,
+        Math.ceil((SEAL_AT - now.getTime()) / 86400000)
+      );
+      line.innerHTML = `12 月 1 日就是你的生日${days > 0 ? `（还有 ${days} 天）` : ""}。黄师傅声称，他把一份「神秘礼物」藏进了这间屋子——却拒绝透露位置。`;
+    }
+  }
+
+  sealUnlockBtn.addEventListener("click", enterStory);
+
+  /* ================= STAGE MACHINE ================= */
   function setStage(name) {
     body.dataset.stage = name;
     if (name === "card") {
-      // sync hint with card state machine (still "closed")
       hint.textContent = HINTS.closed;
       hint.hidden = false;
     }
   }
 
   startBtn.addEventListener("click", () => {
-    investScreen.hidden = false;
     setStage("investigate");
   });
 
+  /* ================= INVESTIGATE ================= */
   function showToast(html) {
     clueToast.innerHTML = html;
     clueToast.classList.add("show");
@@ -923,8 +1354,8 @@
       showToast(`<strong>${c.title}</strong>${c.text}`);
       burstConfetti();
       setTimeout(() => {
-        setStage("card");
-        // brief pause so envelope entrance animation plays cleanly
+        setStage("decode");
+        resetCode();
       }, 900);
       return;
     }
@@ -935,6 +1366,12 @@
     found.add(key);
     clueCountEl.textContent = String(Math.min(found.size, NEED));
 
+    /* evidence chip */
+    const chip = document.createElement("span");
+    chip.className = "ev-chip";
+    chip.textContent = `${c.icon} ${c.title.replace("线索 · ", "")}`;
+    evidenceStrip.appendChild(chip);
+
     const done = found.size === NEED;
     showToast(
       `<strong>${c.title}</strong>${c.text}` +
@@ -943,23 +1380,79 @@
     refreshEnvelope();
   });
 
-  /* ================= card flow (unchanged) ================= */
+  /* ================= DECODE KEYPAD ================= */
+  const CODE = "1201"; // 12月1日 MMDD
+  const codeSlots = Array.from(document.querySelectorAll("#codeDisplay .code-slot"));
+  const codeDisplay = document.getElementById("codeDisplay");
+  const codeMsg = document.getElementById("codeMsg");
+  const keypad = document.getElementById("keypad");
+  let entered = "";
+
+  function renderCode() {
+    codeSlots.forEach((slot, i) => {
+      const ch = entered[i];
+      slot.textContent = ch != null ? ch : "_";
+      slot.classList.toggle("filled", ch != null);
+    });
+  }
+
+  function resetCode() {
+    entered = "";
+    codeMsg.textContent = "";
+    renderCode();
+  }
+
+  function checkCode() {
+    if (entered === CODE) {
+      codeMsg.style.color = "var(--clue)";
+      codeMsg.textContent = "✓ 密码正确——火漆熔化了！";
+      burstConfetti();
+      setTimeout(() => setStage("card"), 800);
+    } else {
+      codeMsg.style.color = "#f0a0b0";
+      codeMsg.textContent = "✗ 密码不对——想想线索里的日期。";
+      codeDisplay.classList.remove("shake");
+      void codeDisplay.offsetWidth;
+      codeDisplay.classList.add("shake");
+      entered = "";
+      renderCode();
+    }
+  }
+
+  keypad.addEventListener("click", (e) => {
+    const btn = e.target.closest(".key");
+    if (!btn) return;
+    const k = btn.dataset.k;
+
+    if (k === "del") {
+      entered = entered.slice(0, -1);
+      renderCode();
+      return;
+    }
+    if (k === "ok") {
+      if (entered.length === 4) checkCode();
+      else {
+        codeMsg.style.color = "#f0a0b0";
+        codeMsg.textContent = "请输入 4 位数字。";
+      }
+      return;
+    }
+    if (entered.length < 4) {
+      entered += k;
+      renderCode();
+      if (entered.length === 4) setTimeout(checkCode, 320);
+    }
+  });
+
+  /* ================= CARD FLOW ================= */
   const envelope = document.getElementById("envelope");
   const cardHolder = document.getElementById("cardHolder");
   const cardInner = document.getElementById("cardInner");
-  const hint = document.getElementById("hint");
   const downloadFront = document.getElementById("downloadFront");
   const downloadBack = document.getElementById("downloadBack");
 
   let state = "closed";
   let rotY = 0, rotX = 0;
-
-  const HINTS = {
-    closed:   "✨ 轻点信封，开启惊喜",
-    opening:  "……",
-    opened:   "☝️ 按住卡片向上拖出（或点一下）",
-    floating: "🖐 用手指旋转看看正反面",
-  };
 
   function setState(s) {
     state = s;
@@ -1151,6 +1644,15 @@
   }
 
   applyRotation();
+
+  /* ================= BOOT ================= */
+  const params = new URLSearchParams(location.search);
+  if (params.get("preview") === "1" || !isSealed()) {
+    enterStory();
+  } else {
+    tickCountdown();
+    cdTimer = setInterval(tickCountdown, 1000);
+  }
 })();
 </script>
 </body>
